@@ -1,6 +1,9 @@
 import { Box, Button, Container, Divider, Fab, Grid2, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
 import EditCustomer from "./editCustomer";
+import { getCustomers } from "./commands";
+import { BaseGetQuery, CustomerDto } from "../../api/GeneratedApiClient";
+import { useCallback, useEffect, useState } from "react";
 
 enum ColumnType{
     Text,
@@ -21,39 +24,35 @@ interface ICustomerRow{
 }
 
 export default function CustomersManagement() {
+    const [customers, setCustomers] = useState<CustomerDto[]>([]);
     const handleAddCustomerClick= ()=>{
         alert('add customer');
     }
 
-    const columns:IColumn[]=[
-        {title:"Name",
-            type:ColumnType.Text,
-            classProperty:"customerName"},
-             {title:"column 1",
-            type:ColumnType.Text,
-            classProperty:"customerField1"},
-            {title:"column 2",
-                type:ColumnType.Text,
-                classProperty:"customerField2"},
-            {title:"action column 1",
-                type:ColumnType.Action,
-            classProperty:""}
-        ];
+    const fetchData = useCallback(async () => {
+    
+    const queryParams: BaseGetQuery = {};
+    var data = await getCustomers(queryParams);
+    setCustomers(data);
+    },[]);
 
-    const rows:ICustomerRow[]=[{
-        id:"1-234",
-        customerName:"Customer 1",
-        customerField1:"1234-2345",
-        customerField2:"addr12",
-    },{id:"2-234",
-        customerName:"Customer 2",
-        customerField1:"2234-2345",
-        customerField2:"addr 2",
-    },{id:"3-234",
-    customerName:"Customer 3",
-    customerField1:"3326-2345",
-    customerField2:"addr 3",
-}]        ;
+    useEffect(() => {
+        fetchData();
+      }, [fetchData]);
+
+    const columns:IColumn[]=[
+        {
+            title:"Name",
+            type:ColumnType.Text,
+            classProperty:"name"
+        },
+        {
+            title:"Id",
+            type:ColumnType.Text,
+            classProperty:"id"
+        },
+    ];
+
 
     return(
         <Container maxWidth={false} sx={{border:"1px solid red", paddingTop:'10px'}} >
@@ -78,14 +77,12 @@ export default function CustomersManagement() {
                 </TableRow>
                 </TableHead>
                 <TableBody>
-                    {rows.map((row, index) => (
+                    {customers.map((row, index) => (
                     <TableRow
                         key={`table-row-${index}`}
                         sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                     >
-                          <TableCell>{row.customerName}</TableCell>
-                          <TableCell>{row.customerField1}</TableCell>
-                          <TableCell>{row.customerField2}</TableCell>
+                          <TableCell>{row.name}</TableCell>
                           <TableCell>edit</TableCell>
             </TableRow>
           ))}
